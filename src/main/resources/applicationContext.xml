@@ -1,0 +1,84 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+    	 http://www.springframework.org/schema/beans/spring-beans.xsd
+     	 http://www.springframework.org/schema/context
+         http://www.springframework.org/schema/context/spring-context.xsd
+         http://www.springframework.org/schema/aop
+         http://www.springframework.org/schema/aop/spring-aop.xsd
+         http://www.springframework.org/schema/tx
+     	 http://www.springframework.org/schema/tx/spring-tx.xsd">
+
+    <bean id="helloAction" class="cn.itning.action.HelloAction" scope="prototype">
+        <property name="userService" ref="userService"/>
+    </bean>
+    <bean id="userService" class="cn.itning.service.UserService">
+        <property name="userDao" ref="userDao"/>
+    </bean>
+    <bean id="userDao" class="cn.itning.dao.UserDao">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+
+    <context:property-placeholder location="classpath:conn.properties"/><!-- 加载配置文件 -->
+    <!-- 1) 连接池实例 -->
+    <bean id="dataSource" class="${dataSource}">
+        <property name="driverClass" value="${driverClass}"/>
+        <property name="jdbcUrl" value="${jdbcUrl}"/>
+        <property name="user" value="${user}"/>
+        <property name="password" value="${password}"/>
+    </bean>
+
+    <!-- 2) SessionFactory实例创建 -->
+    <!-- 所有的配置都由spring维护(项目中不需要hibernate.cfg.xml啦) -->
+    <bean id="sessionFactory" class="org.springframework.orm.hibernate5.LocalSessionFactoryBean">
+        <!-- a. 连接池 -->
+        <property name="dataSource" ref="dataSource"/>
+
+        <!-- b. hibernate常用配置： 方言、显示sql、自动建表等 -->
+        <property name="hibernateProperties">
+            <props>
+                <prop key="hibernate.dialect">org.hibernate.dialect.MySQLDialect</prop>
+                <prop key="hibernate.show_sql">true</prop>
+                <prop key="hibernate.hbm2ddl.auto">update</prop>
+            </props>
+        </property>
+        <!-- c. 映射配置 -->
+        <property name="mappingLocations">
+            <list>
+                <value>classpath:*.hbm.xml</value>
+            </list>
+        </property>
+    </bean>
+
+    <!-- 3) 事务配置 -->
+    <!-- # 事务管理器 -->
+    <bean id="txManager" class="org.springframework.orm.hibernate5.HibernateTransactionManager">
+        <property name="sessionFactory" ref="sessionFactory"/>
+    </bean>
+    <!-- # 事务增强 -->
+    <tx:advice id="txAdvice" transaction-manager="txManager">
+        <tx:attributes>
+            <tx:method name="*" read-only="false"/>
+        </tx:attributes>
+    </tx:advice>
+    <!-- # AOP配置 -->
+    <aop:config>
+        <aop:pointcut expression="execution(* cn.itning.service.*.*(..))" id="pt"/>
+        <aop:advisor advice-ref="txAdvice" pointcut-ref="pt"/>
+    </aop:config>
+
+</beans>     
+
+
+
+
+
+
+
+
+
+
