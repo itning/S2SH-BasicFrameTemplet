@@ -5,11 +5,11 @@
 
 <hibernate-mapping package="cn.itning.entity">
 
-	<class name="User" table="t_dept">
-		<id name="id" column="deptId">
+	<class name="User" table="user">
+		<id name="id" column="userid">
 			<generator class="native"/>
 		</id>
-		<property name="name" column="deptName"/>
+		<property name="name" column="username"/>
 	</class>
 
 </hibernate-mapping>

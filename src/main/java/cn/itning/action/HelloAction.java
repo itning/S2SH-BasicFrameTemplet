@@ -2,16 +2,20 @@ package cn.itning.action;
 
 import cn.itning.service.UserService;
 import com.opensymphony.xwork2.ActionSupport;
+import org.springframework.stereotype.Controller;
 
+import javax.annotation.Resource;
 
+@Controller
 public class HelloAction extends ActionSupport {
 
+    @Resource
     private UserService userService;
 
 
-    public void setUserService(UserService userService) {
+    /*public void setUserService(UserService userService) {
         this.userService = userService;
-    }
+    }*/
 
     /*action中方法必须返回String 不能有参数*/
     @Override
